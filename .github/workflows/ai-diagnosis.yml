@@ -1,15 +1,15 @@
-name: AI Diagnosis Workflow
+name: Analyze Repair Requests
 
 on:
-  issues:
-    types: [opened]
+  push:
+    branches:
+      - main
 
 jobs:
-  analyze:
+  analyze_requests:
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout repository
+      - name: Checkout code
         uses: actions/checkout@v2
 
       - name: Set up Python
@@ -23,28 +23,10 @@ jobs:
           pip install requests
 
       - name: Run analysis
-        id: analyze
         run: |
-          import requests
-          import json
+          python analyze_repair_requests.py
 
-          # Get issue content
-          issue_number = ${{ github.event.issue.number }}
-          issue_url = f'https://api.github.com/repos/{github.repository}/issues/{issue_number}'
-          headers = {'Authorization': f'token ${{ secrets.GITHUB_TOKEN }}'}
-          response = requests.get(issue_url, headers=headers)
-          issue_data = response.json()
-
-          # Process the repair request
-          analysis_result = 'Analysis result here'  # Replace with analysis code
-          quote = 'Quote based on AI calculation'  # Replace with AI API call to calculate quote
-
-          # Prepare comments
-          comment_body = f'Analysis: {analysis_result}\nQuote: {quote}'
-
-          # Posting the result as a comment
-          comment_url = f'https://api.github.com/repos/{github.repository}/issues/{issue_number}/comments'
-          requests.post(comment_url, headers=headers, json={'body': comment_body})
-
-      - name: Complete
-        run: echo 'Workflow completed.'
+      - name: Post quotes
+        run: |
+          # Assuming 'post_quotes.py' handles posting quotes
+          python post_quotes.py
